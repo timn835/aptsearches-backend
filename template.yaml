@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    aptsearches-backend
+
+    Sample SAM Template for aptsearches-backend
+
+Globals:
+    Function:
+        Timeout: 3
+
+Resources:
+    APTSearchesScraper1:
+        Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+        Properties:
+            CodeUri: scraper-1/
+            Handler: src/app.scrape1Handler
+            Runtime: nodejs20.x
+            Architectures:
+                - x86_64
+        Metadata: # Manage esbuild properties
+            BuildMethod: esbuild
+            BuildProperties:
+                Minify: true
+                Target: "es2022"
+                Sourcemap: true
+                EntryPoints:
+                    - src/app.ts

@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'aptsearches-backend
+
+  Sample SAM Template for aptsearches-backend
+
+  '
+Globals:
+  Function:
+    Timeout: 3
+Resources:
+  APTSearchesScraper1:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: APTSearchesScraper1
+      Handler: app.scrape1Handler
+      Runtime: nodejs20.x
+      Architectures:
+      - x86_64
+      Environment:
+        Variables:
+          NODE_OPTIONS: ' --enable-source-maps'
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+        - src/app.ts
+        Minify: true
+        Sourcemap: true
+        Target: es2022
+      SamResourceId: APTSearchesScraper1
