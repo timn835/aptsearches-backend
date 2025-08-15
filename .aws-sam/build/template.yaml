@@ -25,6 +25,8 @@ Resources:
       BuildProperties:
         EntryPoints:
         - src/app.ts
+        External:
+        - dotenv
         Minify: true
         Sourcemap: true
         Target: es2022

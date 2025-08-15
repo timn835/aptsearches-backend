@@ -11,7 +11,7 @@ Globals:
 
 Resources:
     APTSearchesScraper1:
-        Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+        Type: AWS::Serverless::Function
         Properties:
             CodeUri: scraper-1/
             Handler: src/app.scrape1Handler
@@ -21,6 +21,8 @@ Resources:
         Metadata: # Manage esbuild properties
             BuildMethod: esbuild
             BuildProperties:
+                External:
+                    - dotenv
                 Minify: true
                 Target: "es2022"
                 Sourcemap: true

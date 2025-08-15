@@ -1,17 +1,44 @@
-import { scrapeKijiji } from "./lib/scrape-utils";
+import { KIJIJI_URLS, scrapeKijiji } from "./lib/scrape-utils";
+import { type Listing } from "./lib/types";
+import { sleep } from "./lib/utils";
 
 export const scrape1Handler = async () => {
-    try {
-        const listings = await scrapeKijiji("https://www.kijiji.ca/b-location-court-terme/ville-de-montreal/bachelor+studio/c42l1700281a227?price=1000__1500&sort=dateDesc&view=list");
-        return {
-            statusCode: 200,
-            listings,
-        };
-    } catch (err) {
-        console.log(err);
-        return {
-            statusCode: 500,
-                message: "Unable to complete scrape1Handler",
-        };
-    }
+	if (process.env.ENV !== "PROD") {
+		const dotenv = await import("dotenv");
+		dotenv.config();
+	}
+	try {
+		const listings: Listing[] = [];
+		const listingsTracker = new Set<string>();
+		let initialLength = 0;
+
+		// Scrape kijiji
+		for (const url of KIJIJI_URLS) {
+			const scrapedLstings = await scrapeKijiji(url);
+			initialLength += scrapedLstings.length;
+			for (const listing of scrapedLstings) {
+				if (listingsTracker.has(listing.id)) continue;
+				listingsTracker.add(listing.id);
+				listings.push(listing);
+			}
+			await sleep(1000);
+		}
+
+		// Scrape another site here
+
+		// Store in the database
+
+		return {
+			listings,
+			initialLength,
+			length: listings.length,
+			environment: process.env.ENV,
+		};
+	} catch (err) {
+		console.log(err);
+		return {
+			statusCode: 500,
+			message: "Unable to complete scrape1Handler",
+		};
+	}
 };
