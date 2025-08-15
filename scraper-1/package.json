@@ -19,7 +19,8 @@
     "@aws-sdk/client-dynamodb": "^3.864.0",
     "@aws-sdk/credential-providers": "^3.864.0",
     "cheerio": "^1.1.2",
-    "esbuild": "^0.14.14"
+    "esbuild": "^0.14.14",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.2.0",

@@ -5,7 +5,7 @@ codeuri = "/Users/timn835/Documents/Projects/aptsearches-backend/scraper-1"
 runtime = "nodejs20.x"
 architecture = "x86_64"
 handler = "src/app.scrape1Handler"
-manifest_hash = "6d998cb367d7da62acb2c8f295d99358"
+manifest_hash = "72281c1034118080515b259a63eca9a2"
 packagetype = "Zip"
 functions = ["APTSearchesScraper1"]
 
@@ -18,5 +18,6 @@ Minify = true
 Target = "es2022"
 Sourcemap = true
 EntryPoints = ["src/app.ts"]
+
 
 [layer_build_definitions]

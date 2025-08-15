@@ -41,6 +41,7 @@ export const MTL_NEIGHBORHOODS = new Set<string>([
 
 export type Listing = {
 	id: string;
+	dateFound: number;
 	name: string;
 	description: string;
 	imageUrl: string;
@@ -48,7 +49,7 @@ export type Listing = {
 	address: string;
 	price: number;
 	priceCurrency: string;
-	source: AptSource;
+	aptSource: AptSource;
 	size: number; // 0 is for studio, 1 is for 1 bedroom, 2 for 2 bedrooms, etc.
 	petsAllowed?: boolean;
 	neighborhood?: string; // this will be added later on

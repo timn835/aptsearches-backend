@@ -1,6 +1,6 @@
-import { KIJIJI_URLS, scrapeKijiji } from "./lib/scrape-utils";
-import { type Listing } from "./lib/types";
-import { sleep } from "./lib/utils";
+import { storeListings } from "./lib/db-utils";
+import { scrapeKijiji } from "./lib/scrape-utils";
+import { AptSource } from "./lib/types";
 
 export const scrape1Handler = async () => {
 	if (process.env.ENV !== "PROD") {
@@ -8,31 +8,23 @@ export const scrape1Handler = async () => {
 		dotenv.config();
 	}
 	try {
-		const listings: Listing[] = [];
-		const listingsTracker = new Set<string>();
-		let initialLength = 0;
-
 		// Scrape kijiji
-		for (const url of KIJIJI_URLS) {
-			const scrapedLstings = await scrapeKijiji(url);
-			initialLength += scrapedLstings.length;
-			for (const listing of scrapedLstings) {
-				if (listingsTracker.has(listing.id)) continue;
-				listingsTracker.add(listing.id);
-				listings.push(listing);
-			}
-			await sleep(1000);
-		}
-
-		// Scrape another site here
+		// TODO: when adding more sites, convert to a Promise.allSettled
+		const kijijiListings = await scrapeKijiji();
 
 		// Store in the database
+		// TODO: when adding more sites, convert to a Promise.allSettled
+		const createdListings = await storeListings(
+			kijijiListings,
+			AptSource.KIJIJI
+		);
 
 		return {
-			listings,
-			initialLength,
-			length: listings.length,
+			// listings: createdListings,
 			environment: process.env.ENV,
+			message: `created ${createdListings.length} listing${
+				createdListings.length !== 1 ? "s" : ""
+			}`,
 		};
 	} catch (err) {
 		console.log(err);
