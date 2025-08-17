@@ -1,43 +1,7 @@
 export enum AptSource {
 	KIJIJI = "KIJIJI",
+	CENTRIS = "CENTRIS",
 }
-
-export const MTL_NEIGHBORHOODS = new Set<string>([
-	"LaSalle",
-	"Dollard-des-Ormeaux",
-	"Côte-Saint-Luc",
-	"Villeray-Saint-Michel-Parc-Extension",
-	"Rosemont-La Petite-Patrie",
-	"Hampstead",
-	"Senneville",
-	"Le Plateau-Mont-Royal",
-	"Sainte-Anne-de-Bellevue",
-	"Montréal-Ouest",
-	"Côte-des-Neiges-Notre-Dame-de-Grâce",
-	"L'Île-Bizard-Sainte-Geneviève",
-	"Beaconsfield",
-	"Anjou",
-	"Verdun",
-	"Le Sud-Ouest",
-	"Mercier-Hochelaga-Maisonneuve",
-	"Montréal-Est",
-	"Lachine",
-	"Saint-Léonard",
-	"Montréal-Nord",
-	"Outremont",
-	"L'Île-Dorval",
-	"Mont-Royal",
-	"Pointe-Claire",
-	"Dorval",
-	"Pierrefonds-Roxboro",
-	"Rivière-des-Prairies-Pointe-aux-Trembles",
-	"Ahuntsic-Cartierville",
-	"Saint-Laurent",
-	"Ville-Marie",
-	"Kirkland",
-	"Baie-D'Urfé",
-	"Westmount",
-]);
 
 export type Listing = {
 	id: string;
