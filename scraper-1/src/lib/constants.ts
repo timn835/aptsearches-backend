@@ -29097,3 +29097,15 @@ export const MONTREAL_NEIGHBORHOODS_DATA = {
 		},
 	],
 };
+
+export const CENTRIS_NEIGHBORHOOD_MAP: Record<string, string> = {
+	"Villeray/Saint-Michel/Parc-Extension":
+		"Villeray-Saint-Michel-Parc-Extension",
+	"Rosemont/La Petite-Patrie": "Rosemont-La Petite-Patrie",
+	"Côte-des-Neiges/Notre-Dame-de-Grâce":
+		"Côte-des-Neiges-Notre-Dame-de-Grâce",
+	"Mercier/Hochelaga-Maisonneuve": "Mercier-Hochelaga-Maisonneuve",
+	"Verdun/Île-des-Soeurs": "Verdun",
+	"Rivière-des-Prairies/Pointe-aux-Trembles":
+		"Rivière-des-Prairies-Pointe-aux-Trembles",
+};

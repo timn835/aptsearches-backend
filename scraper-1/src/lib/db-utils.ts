@@ -39,7 +39,6 @@ export async function storeListings(listings: Listing[], aptSource: AptSource) {
 		};
 		const command = new QueryCommand(params);
 		const response = await dbClient.send(command);
-		console.log(response.Items?.slice(0, 5));
 		if (response.Items) {
 			allItems.push(
 				...response.Items.map((item) => item.id.S?.split(":")[0] || "")

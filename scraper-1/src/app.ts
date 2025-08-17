@@ -11,30 +11,56 @@ export const scrape1Handler = async () => {
 	try {
 		// Scrape kijiji
 		// TODO: when adding more sites, convert to a Promise.allSettled
-		// const kijijiListings = await scrapeKijiji();
+		let [kijijiResult, centrisResult] = await Promise.allSettled([
+			scrapeKijiji(),
+			scrapeCentris(),
+		]);
 
-		// Scrape Centris
-		const centrisListings = await scrapeCentris();
-		return {
-			first: centrisListings.slice(0, 5),
-			second: centrisListings.slice(-5),
-			listings: centrisListings.length,
-		};
+		const kijijiListings =
+			kijijiResult.status === "fulfilled" ? kijijiResult.value : [];
+		if (kijijiResult.status === "rejected") {
+			console.error("Error scraping Kijiji:", kijijiResult.reason);
+		}
+
+		const centrisListings =
+			centrisResult.status === "fulfilled" ? centrisResult.value : [];
+		if (centrisResult.status === "rejected") {
+			console.error("Error scraping Centris:", centrisResult.reason);
+		}
 
 		// Store in the database
 		// TODO: when adding more sites, convert to a Promise.allSettled
-		// const createdListings = await storeListings(
-		// 	kijijiListings,
-		// 	AptSource.KIJIJI
-		// );
+		[kijijiResult, centrisResult] = await Promise.allSettled([
+			storeListings(kijijiListings, AptSource.KIJIJI),
+			storeListings(centrisListings, AptSource.CENTRIS),
+		]);
 
-		// return {
-		// 	// listings: createdListings,
-		// 	environment: process.env.ENV,
-		// 	message: `created ${createdListings.length} listing${
-		// 		createdListings.length !== 1 ? "s" : ""
-		// 	}`,
-		// };
+		const createdKijijiListings =
+			kijijiResult.status === "fulfilled" ? kijijiResult.value : [];
+		if (kijijiResult.status === "rejected") {
+			console.error(
+				"Error storing Kijiji listings:",
+				kijijiResult.reason
+			);
+		}
+
+		const createdCentrisListings =
+			centrisResult.status === "fulfilled" ? centrisResult.value : [];
+		if (centrisResult.status === "rejected") {
+			console.error(
+				"Error storing Centris listings:",
+				centrisResult.reason
+			);
+		}
+
+		return {
+			environment: process.env.ENV,
+			message: `created ${createdKijijiListings.length} Kijiji listing${
+				createdKijijiListings.length !== 1 ? "s" : ""
+			}, created ${createdCentrisListings.length} Centris listing${
+				createdCentrisListings.length !== 1 ? "s" : ""
+			}`,
+		};
 	} catch (err) {
 		console.log(err);
 		return {

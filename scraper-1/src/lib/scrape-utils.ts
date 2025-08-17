@@ -1,13 +1,15 @@
 import * as cheerio from "cheerio";
 import {
 	CENTRIS_HEADERS,
+	CENTRIS_NEIGHBORHOOD_MAP,
 	getCentrisQuery,
 	INITIAL_CENTRIS_HEADERS,
 	KIJIJI_HEADERS,
 	KIJIJI_URLS,
+	MTL_NEIGHBORHOODS,
 } from "./constants";
 import { AptSource, Listing } from "./types";
-import { findNeighborhoods, sleep } from "./utils";
+import { sleep } from "./utils";
 // import { writeFile } from "node:fs/promises";
 
 export async function scrapeKijiji(
@@ -121,7 +123,7 @@ export async function scrapeCentris(bedrooms?: string): Promise<Listing[]> {
 	const startSessionResult = await fetch(
 		bedrooms === "0"
 			? "https://www.centris.ca/en/lofts-studios~for-rent~montreal?uc=0"
-			: "https://www.centris.ca/en/condos-apartments~for-rent?uc=0",
+			: "https://www.centris.ca/en/condos-apartments~for-rent~montreal?uc=0",
 		{
 			headers: INITIAL_CENTRIS_HEADERS,
 		}
@@ -161,7 +163,7 @@ export async function scrapeCentris(bedrooms?: string): Promise<Listing[]> {
 
 		// Apartment fetch
 		res = await fetch(
-			"https://www.centris.ca/en/condos-apartments~for-rent?uc=0",
+			"https://www.centris.ca/en/condos-apartments~for-rent~montreal?uc=0",
 			{
 				headers: { ...CENTRIS_HEADERS, Cookie: Cookie! },
 			}
@@ -199,15 +201,20 @@ export async function scrapeCentris(bedrooms?: string): Promise<Listing[]> {
 			const line2 = addressDivs.eq(1).text().trim();
 			const address = `${line1}, ${line2}`;
 
-			// id, lat, lng
+			let neighborhood =
+				address.charAt(address.length - 1) === ")"
+					? address.split("(")?.at(1)?.split(")")?.at(0)
+					: address.split(", ")?.at(-1);
+			if (neighborhood) {
+				if (CENTRIS_NEIGHBORHOOD_MAP[neighborhood])
+					neighborhood = CENTRIS_NEIGHBORHOOD_MAP[neighborhood];
+				else if (!MTL_NEIGHBORHOODS.has(neighborhood))
+					neighborhood = "";
+			}
+
+			// Get id
 			const matchScore = $el.find(".ll-match-score");
 			const id = matchScore.attr("data-id") || "";
-			let lat: string | number | undefined =
-				matchScore.attr("data-lat") || undefined;
-			let lng: string | number | undefined =
-				matchScore.attr("data-lng") || undefined;
-			if (lat) lat = parseFloat(lat);
-			if (lng) lng = parseFloat(lng);
 
 			// price (from <meta itemprop="price">, fallback to text)
 			let price: string | number =
@@ -227,37 +234,27 @@ export async function scrapeCentris(bedrooms?: string): Promise<Listing[]> {
 				dateFound: 0,
 				name: address,
 				description: "Listing found on centris.ca",
-				lat: isNaN(lat as number) ? undefined : (lat as number),
-				lng: isNaN(lng as number) ? undefined : (lng as number),
 				price,
 				priceCurrency: "CAD",
 				aptSource: AptSource.CENTRIS,
 				size: 0,
+				neighborhood,
 			};
 		})
 		.get();
 
-	// Find neighborhoods, as centris provides the lng/lat
-	const neighborhoods = findNeighborhoods(
-		listings.map(({ lat, lng }) => [lng, lat])
-	);
-
-	// Add neighborhoods and timestamp
+	// Adjust neighborhoods and timestamp
 	let timeStamp = new Date().getTime() + listings.length;
 	for (let i = 0; i < listings.length; i++) {
 		// Add date found
 		timeStamp -= 1;
 		listings[i].dateFound = timeStamp;
 
-		// Remove lat & lng
-		delete listings[i].lng;
-		delete listings[i].lat;
-
-		// Add neighborhood
-		if (neighborhoods[i]) listings[i].neighborhood = neighborhoods[i];
+		// Remove empty neighborhood
+		if (!listings[i].neighborhood) delete listings[i].neighborhood;
 	}
 	// Take a break
 	await sleep(1000);
-	console.log(`found ${listings.length} listings!`);
+	// console.log(`found ${listings.length} listings!`);
 	return listings;
 }
