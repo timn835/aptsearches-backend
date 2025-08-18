@@ -50,6 +50,29 @@ export const CENTRIS_HEADERS = {
 	Referer: "https://www.centris.ca/en/lofts-studios~for-rent~montreal?uc=0",
 };
 
+export const FBMARKETPLACE_HEADERS = {
+	"Cache-Control": "max-age=0",
+	Dpr: "2",
+	"Viewport-Width": "1432",
+	"Sec-Ch-Ua": `"Chromium";v="139", "Not;A=Brand";v="99"`,
+	"Sec-Ch-Ua-Mobile": "?0",
+	"Sec-Ch-Ua-Platform": `"macOS"`,
+	"Sec-Ch-Prefers-Color-Scheme": "dark",
+	"Accept-Language": "en-US,en;q=0.9",
+	"Upgrade-Insecure-Requests": "1",
+	"User-Agent":
+		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+	Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+	"Sec-Fetch-Site": "same-origin",
+	"Sec-Fetch-Mode": "navigate",
+	"Sec-Fetch-User": "?1",
+	"Sec-Fetch-Dest": "document",
+	Referer:
+		"https://www.facebook.com/marketplace/montreal/propertyrentals?minBedrooms=1&exact=false",
+	"Accept-Encoding": "gzip, deflate, br",
+	Priority: "u=0, i",
+};
+
 export function getCentrisQuery(bedrooms: string): string {
 	return JSON.stringify({
 		query: {

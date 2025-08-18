@@ -1,6 +1,7 @@
 export enum AptSource {
 	KIJIJI = "KIJIJI",
 	CENTRIS = "CENTRIS",
+	FBMARKETPLACE = "FBMARKETPLACE",
 }
 
 export type Listing = {

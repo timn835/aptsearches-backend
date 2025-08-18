@@ -51,3 +51,22 @@ export function findNeighborhoods(
 
 	return result;
 }
+
+//General utils
+export function extractKey(key: string, data: any): any {
+	// we assume data is either null, a string, an array or an object
+	if (!data || typeof data === "string") return null;
+	if (Array.isArray(data)) {
+		for (const value of data) {
+			let res = extractKey(key, value);
+			if (res) return res;
+		}
+	} else {
+		for (let [currKey, value] of Object.entries(data)) {
+			if (currKey === key) return value;
+			let res = extractKey(key, value);
+			if (res) return res;
+		}
+	}
+	return null;
+}
