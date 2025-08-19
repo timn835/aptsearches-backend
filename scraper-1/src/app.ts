@@ -11,25 +11,23 @@ export const scrape1Handler = async () => {
 	}
 
 	try {
+		// Scrape in parallel
 		let [kijijiResult, centrisResult, fbmarketplaceResult] =
 			await Promise.allSettled([
 				scrapeKijiji(),
 				scrapeCentris(),
 				scrapeFBMarketplace(),
 			]);
-
 		const kijijiListings =
 			kijijiResult.status === "fulfilled" ? kijijiResult.value : [];
 		if (kijijiResult.status === "rejected") {
 			console.error("Error scraping Kijiji:", kijijiResult.reason);
 		}
-
 		const centrisListings =
 			centrisResult.status === "fulfilled" ? centrisResult.value : [];
 		if (centrisResult.status === "rejected") {
 			console.error("Error scraping Centris:", centrisResult.reason);
 		}
-
 		const fbmarketplaceListings =
 			fbmarketplaceResult.status === "fulfilled"
 				? fbmarketplaceResult.value
@@ -40,16 +38,13 @@ export const scrape1Handler = async () => {
 				fbmarketplaceResult.reason
 			);
 		}
-
 		// Store in the database
-		// TODO: when adding more sites, convert to a Promise.allSettled
 		[kijijiResult, centrisResult, fbmarketplaceResult] =
 			await Promise.allSettled([
 				storeListings(kijijiListings, AptSource.KIJIJI),
 				storeListings(centrisListings, AptSource.CENTRIS),
 				storeListings(fbmarketplaceListings, AptSource.FBMARKETPLACE),
 			]);
-
 		const createdKijijiListings =
 			kijijiResult.status === "fulfilled" ? kijijiResult.value : [];
 		if (kijijiResult.status === "rejected") {
@@ -58,7 +53,6 @@ export const scrape1Handler = async () => {
 				kijijiResult.reason
 			);
 		}
-
 		const createdCentrisListings =
 			centrisResult.status === "fulfilled" ? centrisResult.value : [];
 		if (centrisResult.status === "rejected") {
@@ -67,7 +61,6 @@ export const scrape1Handler = async () => {
 				centrisResult.reason
 			);
 		}
-
 		const createdFBMarketplaceListings =
 			fbmarketplaceResult.status === "fulfilled"
 				? fbmarketplaceResult.value
@@ -78,7 +71,6 @@ export const scrape1Handler = async () => {
 				fbmarketplaceResult.reason
 			);
 		}
-
 		return {
 			environment: process.env.ENV,
 			message: `Created ${createdKijijiListings.length} Kijiji listing${

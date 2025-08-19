@@ -47,7 +47,6 @@ export const CENTRIS_HEADERS = {
 	"Sec-Fetch-Site": "same-origin",
 	"Sec-Fetch-Mode": "cors",
 	"Sec-Fetch-Dest": "empty",
-	Referer: "https://www.centris.ca/en/lofts-studios~for-rent~montreal?uc=0",
 };
 
 export const FBMARKETPLACE_HEADERS = {
@@ -67,8 +66,7 @@ export const FBMARKETPLACE_HEADERS = {
 	"Sec-Fetch-Mode": "navigate",
 	"Sec-Fetch-User": "?1",
 	"Sec-Fetch-Dest": "document",
-	Referer:
-		"https://www.facebook.com/marketplace/montreal/propertyrentals?minBedrooms=1&exact=false",
+	Referer: "https://www.facebook.com/marketplace",
 	"Accept-Encoding": "gzip, deflate, br",
 	Priority: "u=0, i",
 };

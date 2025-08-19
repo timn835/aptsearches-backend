@@ -34,7 +34,6 @@ export async function scrapeCentris(bedrooms?: string): Promise<Listing[]> {
 				listingsTracker.add(listing.id);
 				listings.push(listing);
 			}
-			await sleep(1000);
 		}
 		return listings;
 	}
@@ -63,120 +62,142 @@ export async function scrapeCentris(bedrooms?: string): Promise<Listing[]> {
 		body: JSON.stringify({ sort: 3 }),
 	});
 
-	let res: Response;
-	let text: string;
-	if (bedrooms === "0") {
-		// Studio general fetch
-		res = await fetch("https://www.centris.ca/Property/GetInscriptions", {
-			method: "POST",
-			headers: { ...CENTRIS_HEADERS, Cookie: Cookie! },
-			body: JSON.stringify({ startPosition: 0 }),
-		});
-		const data = await res.json();
-		text = data.d.Result.html;
-	} else {
-		// Update query
+	// If appartment, update query
+	if (bedrooms !== "0") {
 		await fetch("https://www.centris.ca/api/property/UpdateQuery", {
 			method: "POST",
-			headers: { ...CENTRIS_HEADERS, Cookie: Cookie! },
+			headers: {
+				...CENTRIS_HEADERS,
+				Referer:
+					"https://www.centris.ca/en/condos-apartments~for-rent~montreal",
+				Cookie: Cookie!,
+			},
 			body: getCentrisQuery(bedrooms),
 		});
+	}
 
-		// Apartment fetch
-		res = await fetch(
-			"https://www.centris.ca/en/condos-apartments~for-rent~montreal?uc=0",
-			{
-				headers: { ...CENTRIS_HEADERS, Cookie: Cookie! },
-			}
+	let res: Response;
+	let text: string;
+	let count = 0;
+	let totalListings: Listing[] = [];
+	while (true) {
+		res = await fetch("https://www.centris.ca/Property/GetInscriptions", {
+			method: "POST",
+			headers: {
+				...CENTRIS_HEADERS,
+				Referer:
+					bedrooms === "0"
+						? "https://www.centris.ca/en/lofts-studios~for-rent~montreal?uc=0"
+						: "https://www.centris.ca/en/condos-apartments~for-rent~montreal",
+				Cookie: Cookie!,
+			},
+			body: JSON.stringify({ startPosition: count }),
+		});
+		const data = await res.json();
+
+		// Update the count and totalCount
+		count += data.d.Result.inscNumberPerPage; // usually inscNumberPerPage is 20
+		const totalCount = data.d.Result.count;
+		text = data.d.Result.html;
+
+		// Write to file for analysis
+		// writeFile("page.html", text, "utf8");
+
+		const $ = cheerio.load(text!);
+
+		const listings: (Listing & { lng?: number; lat?: number })[] = $(
+			".property-thumbnail-item"
+		)
+			.map((_, el) => {
+				const $el = $(el);
+
+				// url
+				const url = `https://www.centris.ca${
+					$el
+						.find(".property-thumbnail-summary-link")
+						.first()
+						.attr("href") || ""
+				}`;
+
+				// imageUrl
+				const imageUrl =
+					$el
+						.find(".property-thumbnail-summary-link img")
+						.attr("src") || "";
+
+				// address
+				const addressDivs = $el.find(".address div");
+				const line1 = addressDivs.eq(0).text().trim();
+				const line2 = addressDivs.eq(1).text().trim();
+				const address = `${line1}, ${line2}`;
+
+				let neighborhood =
+					address.charAt(address.length - 1) === ")"
+						? address.split("(")?.at(1)?.split(")")?.at(0)
+						: address.split(", ")?.at(-1);
+				if (neighborhood) {
+					if (CENTRIS_NEIGHBORHOOD_MAP[neighborhood])
+						neighborhood = CENTRIS_NEIGHBORHOOD_MAP[neighborhood];
+					else if (!MTL_NEIGHBORHOODS.has(neighborhood))
+						neighborhood = "";
+				}
+
+				// Get id
+				const matchScore = $el.find(".ll-match-score");
+				const id = matchScore.attr("data-id") || "";
+
+				// price (from <meta itemprop="price">, fallback to text)
+				let price: string | number =
+					$el.find(".price meta[itemprop='price']").attr("content") ||
+					"";
+				if (!price) {
+					const priceText = $el.find(".price span").first().text();
+					price = priceText.replace(/[^\d]/g, ""); // strip $ and commas
+				}
+				price = parseFloat(price);
+				if (isNaN(price)) price = 0;
+
+				let size = parseInt(bedrooms);
+				if (isNaN(size)) size = 0;
+
+				return {
+					id,
+					url,
+					imageUrl,
+					address,
+					dateFound: 0,
+					name: address,
+					description: "Listing found on centris.ca",
+					price,
+					priceCurrency: "CAD",
+					aptSource: AptSource.CENTRIS,
+					size,
+					neighborhood,
+				};
+			})
+			.get();
+
+		// Adjust neighborhoods and timestamp
+		let timeStamp = new Date().getTime() + listings.length;
+		for (let i = 0; i < listings.length; i++) {
+			// Add date found
+			timeStamp -= 1;
+			listings[i].dateFound = timeStamp;
+
+			// Remove empty neighborhood
+			if (!listings[i].neighborhood) delete listings[i].neighborhood;
+		}
+
+		console.log(
+			`scraped ${
+				listings.length
+			} Centris listings for ${bedrooms} bedrooms, page ${Math.round(
+				count / 20
+			)}`
 		);
-		text = await res.text();
+		totalListings.push(...listings);
+		if (count >= totalCount || count >= 100) break;
+		await sleep(1000);
 	}
-
-	// Write to file for analysis
-	// writeFile("page.html", text, "utf8");
-
-	const $ = cheerio.load(text!);
-
-	const listings: (Listing & { lng?: number; lat?: number })[] = $(
-		".property-thumbnail-item"
-	)
-		.map((_, el) => {
-			const $el = $(el);
-
-			// href
-			const url = `https://www.centris.ca${
-				$el
-					.find(".property-thumbnail-summary-link")
-					.first()
-					.attr("href") || ""
-			}`;
-
-			// imgUrl
-			const imageUrl =
-				$el.find(".property-thumbnail-summary-link img").attr("src") ||
-				"";
-
-			// address
-			const addressDivs = $el.find(".address div");
-			const line1 = addressDivs.eq(0).text().trim();
-			const line2 = addressDivs.eq(1).text().trim();
-			const address = `${line1}, ${line2}`;
-
-			let neighborhood =
-				address.charAt(address.length - 1) === ")"
-					? address.split("(")?.at(1)?.split(")")?.at(0)
-					: address.split(", ")?.at(-1);
-			if (neighborhood) {
-				if (CENTRIS_NEIGHBORHOOD_MAP[neighborhood])
-					neighborhood = CENTRIS_NEIGHBORHOOD_MAP[neighborhood];
-				else if (!MTL_NEIGHBORHOODS.has(neighborhood))
-					neighborhood = "";
-			}
-
-			// Get id
-			const matchScore = $el.find(".ll-match-score");
-			const id = matchScore.attr("data-id") || "";
-
-			// price (from <meta itemprop="price">, fallback to text)
-			let price: string | number =
-				$el.find(".price meta[itemprop='price']").attr("content") || "";
-			if (!price) {
-				const priceText = $el.find(".price span").first().text();
-				price = priceText.replace(/[^\d]/g, ""); // strip $ and commas
-			}
-			price = parseFloat(price);
-			if (isNaN(price)) price = 0;
-
-			let size = parseInt(bedrooms);
-			if (isNaN(size)) size = 0;
-
-			return {
-				id,
-				url,
-				imageUrl,
-				address,
-				dateFound: 0,
-				name: address,
-				description: "Listing found on centris.ca",
-				price,
-				priceCurrency: "CAD",
-				aptSource: AptSource.CENTRIS,
-				size,
-				neighborhood,
-			};
-		})
-		.get();
-
-	// Adjust neighborhoods and timestamp
-	let timeStamp = new Date().getTime() + listings.length;
-	for (let i = 0; i < listings.length; i++) {
-		// Add date found
-		timeStamp -= 1;
-		listings[i].dateFound = timeStamp;
-
-		// Remove empty neighborhood
-		if (!listings[i].neighborhood) delete listings[i].neighborhood;
-	}
-	// console.log(`found ${listings.length} listings!`);
-	return listings;
+	return totalListings;
 }
