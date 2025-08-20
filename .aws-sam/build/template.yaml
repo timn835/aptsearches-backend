@@ -31,3 +31,32 @@ Resources:
         Sourcemap: true
         Target: es2022
       SamResourceId: APTSearchesScraper1
+  APTSearchesAPI:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: APTSearchesAPI
+      Handler: app.handler
+      Runtime: nodejs20.x
+      Architectures:
+      - x86_64
+      Description: Backend api for APTSearches
+      Events:
+        ApiGateway:
+          Type: HttpApi
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+      Policies:
+      - AWSLambdaBasicExecutionRole
+      Environment:
+        Variables:
+          NODE_OPTIONS: ' --enable-source-maps'
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        External:
+        - dotenv
+        Minify: true
+        Sourcemap: true
+        Target: es2022
+      SamResourceId: APTSearchesAPI

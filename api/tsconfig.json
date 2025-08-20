@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+		"module": "es2022",
+		"target": "es2022",
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"strict": true,
+		"preserveConstEnums": true,
+		"noEmit": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"sourceMap": true
+	},
+	"exclude": ["node_modules", "**/*.test.ts"]
+}

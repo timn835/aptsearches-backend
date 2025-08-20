@@ -28,3 +28,29 @@ Resources:
                 Sourcemap: true
                 EntryPoints:
                     - src/app.ts
+
+    APTSearchesAPI:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: api/
+            Handler: src/app.handler
+            Runtime: nodejs20.x
+            Architectures:
+                - x86_64
+            Description: Backend api for APTSearches
+            Events:
+                ApiGateway:
+                    Type: HttpApi
+                    Properties:
+                        Path: /{proxy+}
+                        Method: ANY
+            Policies:
+                - AWSLambdaBasicExecutionRole
+        Metadata: # Manage esbuild properties
+            BuildMethod: esbuild
+            BuildProperties:
+                External:
+                    - dotenv
+                Minify: true
+                Target: "es2022"
+                Sourcemap: true

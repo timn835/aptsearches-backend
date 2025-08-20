@@ -1,0 +1,29 @@
+{
+	"name": "api",
+	"version": "1.0.0",
+	"description": "",
+	"main": "app.ts",
+	"type": "module",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"dev": "tsx watch src/app.ts",
+		"deploy": "cd .. && sam build && sam deploy --no-confirm-changeset && cd api"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@aws-sdk/client-dynamodb": "^3.872.0",
+		"@aws-sdk/credential-providers": "^3.872.0",
+		"@fastify/aws-lambda": "^6.0.0",
+		"@fastify/cors": "^11.1.0",
+		"esbuild": "^0.25.9",
+		"fastify": "^5.5.0"
+	},
+	"devDependencies": {
+		"@types/node": "^24.3.0",
+		"dotenv": "^17.2.1",
+		"tsx": "^4.20.4",
+		"typescript": "^5.9.2"
+	}
+}
