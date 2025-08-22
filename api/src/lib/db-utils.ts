@@ -1,0 +1,49 @@
+import {
+	DynamoDBClient,
+	QueryCommand,
+	type QueryCommandInput,
+} from "@aws-sdk/client-dynamodb";
+import { fromEnv } from "@aws-sdk/credential-providers";
+import { type Listing, type AptSource } from "./types";
+
+const LISTINGS_TABLE = "aptsearches_listings";
+
+const dbClient = new DynamoDBClient({
+	region: process.env.AWS_REGION,
+	credentials: fromEnv(),
+});
+
+export async function fetchListings(aptSource: AptSource): Promise<Listing[]> {
+	const params: QueryCommandInput = {
+		TableName: LISTINGS_TABLE,
+		IndexName: "aptSource-dateFound-index",
+		KeyConditionExpression: "aptSource = :aptSource",
+		ExpressionAttributeValues: {
+			":aptSource": { S: aptSource },
+		},
+		// ProjectionExpression: "id",
+		ScanIndexForward: false,
+		Limit: 1000,
+	};
+	const command = new QueryCommand(params);
+	const response = await dbClient.send(command);
+	if (!response?.Items)
+		throw Error(`Unable to fetch listings from ${aptSource} source`);
+	return response.Items.map((item) =>
+		Object.fromEntries(
+			Object.entries(item).map(([key, value]) => {
+				if (value.S) return [key, value.S];
+				if (value.N) {
+					// handle floating point
+					if (key === "price") {
+						return [key, parseFloat(value.N)];
+					}
+					// handle integer
+					return [key, parseInt(value.N)];
+				}
+				if (value.BOOL) return [key, value.BOOL];
+				return [key, Object.values(value)[0]];
+			})
+		)
+	) as Listing[];
+}
