@@ -47,12 +47,15 @@ EntryPoints = ["src/app.ts"]
 
 
 
+
+
+
 [function_build_definitions.1a7a903d-8934-42bf-83f9-eaad4a89c7a2]
 codeuri = "/Users/timn835/Documents/Projects/aptsearches-backend/api"
 runtime = "nodejs20.x"
 architecture = "x86_64"
 handler = "src/app.handler"
-manifest_hash = "54651d82710ad83881cbcd6f87e8478c"
+manifest_hash = "3452b9c6f9a49b96c5af038963a0f7d5"
 packagetype = "Zip"
 functions = ["APTSearchesAPI"]
 
@@ -64,6 +67,9 @@ External = ["dotenv"]
 Minify = true
 Target = "es2022"
 Sourcemap = true
+
+
+
 
 
 

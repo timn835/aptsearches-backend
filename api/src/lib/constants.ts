@@ -3,10 +3,10 @@ import { AptSource } from "../lib/types";
 
 export const allowedOrigins = [
 	"http://localhost:5173",
-	// "https://search-quest.net",
-	// "https://www.search-quest.net",
-	// "https://main.d3rvmvp6m28np.amplifyapp.com",
-	// "https://www.main.d3rvmvp6m28np.amplifyapp.com",
+	"https://main.d1ycolmbjxtgas.amplifyapp.com",
+	"https://www.main.d1ycolmbjxtgas.amplifyapp.com",
+	"https://aptsearches.com",
+	"https://www.aptsearches.com",
 ];
 
 export const getListings: RouteShorthandOptions = {
@@ -53,6 +53,29 @@ export const getListings: RouteShorthandOptions = {
 						},
 					},
 				},
+			},
+		},
+	},
+};
+
+export const createSubscription: RouteShorthandOptions = {
+	schema: {
+		body: {
+			type: "object",
+			properties: {
+				email: { type: "string" },
+			},
+			required: ["email"],
+		},
+		response: {
+			201: {
+				type: "object",
+				properties: {
+					message: {
+						type: "string",
+					},
+				},
+				required: ["message"],
 			},
 		},
 	},
