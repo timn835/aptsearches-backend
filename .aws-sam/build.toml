@@ -50,6 +50,8 @@ EntryPoints = ["src/app.ts"]
 
 
 
+
+
 [function_build_definitions.1a7a903d-8934-42bf-83f9-eaad4a89c7a2]
 codeuri = "/Users/timn835/Documents/Projects/aptsearches-backend/api"
 runtime = "nodejs20.x"
@@ -86,6 +88,28 @@ Sourcemap = true
 
 
 
+
+
+
+
+[function_build_definitions.16db40de-4e4c-4f26-b173-a71ba82c7cdd]
+codeuri = "/Users/timn835/Documents/Projects/aptsearches-backend/sender-1"
+runtime = "nodejs20.x"
+architecture = "x86_64"
+handler = "src/app.send1Handler"
+manifest_hash = "6b7efb09978c48af866e31b9df913ad0"
+packagetype = "Zip"
+functions = ["APTSearchesSender1"]
+
+[function_build_definitions.16db40de-4e4c-4f26-b173-a71ba82c7cdd.metadata]
+BuildMethod = "esbuild"
+
+[function_build_definitions.16db40de-4e4c-4f26-b173-a71ba82c7cdd.metadata.BuildProperties]
+External = ["dotenv"]
+Minify = true
+Target = "es2022"
+Sourcemap = true
+EntryPoints = ["src/app.ts"]
 
 
 [layer_build_definitions]

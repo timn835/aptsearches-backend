@@ -29,6 +29,25 @@ Resources:
                 EntryPoints:
                     - src/app.ts
 
+    APTSearchesSender1:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: sender-1/
+            Handler: src/app.send1Handler
+            Runtime: nodejs20.x
+            Architectures:
+                - x86_64
+        Metadata: # Manage esbuild properties
+            BuildMethod: esbuild
+            BuildProperties:
+                External:
+                    - dotenv
+                Minify: true
+                Target: "es2022"
+                Sourcemap: true
+                EntryPoints:
+                    - src/app.ts
+
     APTSearchesAPI:
         Type: AWS::Serverless::Function
         Properties:

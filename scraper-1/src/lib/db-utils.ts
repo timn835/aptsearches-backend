@@ -20,8 +20,7 @@ const dbClient = new DynamoDBClient({
 
 export async function storeListings(listings: Listing[], aptSource: AptSource) {
 	// Fetch ALL items by aptSource (could be inefficient, but whatever)
-	let lastEvaluatedKey: QueryCommandOutput["LastEvaluatedKey"] | undefined =
-		undefined;
+	let lastEvaluatedKey: QueryCommandOutput["LastEvaluatedKey"] = undefined;
 	const allItems: string[] = [];
 
 	do {

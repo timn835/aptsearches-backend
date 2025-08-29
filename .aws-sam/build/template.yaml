@@ -31,6 +31,28 @@ Resources:
         Sourcemap: true
         Target: es2022
       SamResourceId: APTSearchesScraper1
+  APTSearchesSender1:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: APTSearchesSender1
+      Handler: app.send1Handler
+      Runtime: nodejs20.x
+      Architectures:
+      - x86_64
+      Environment:
+        Variables:
+          NODE_OPTIONS: ' --enable-source-maps'
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+        - src/app.ts
+        External:
+        - dotenv
+        Minify: true
+        Sourcemap: true
+        Target: es2022
+      SamResourceId: APTSearchesSender1
   APTSearchesAPI:
     Type: AWS::Serverless::Function
     Properties:

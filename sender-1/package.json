@@ -1,0 +1,35 @@
+{
+	"name": "hello_world",
+	"version": "1.0.0",
+	"type": "module",
+	"description": "hello world sample for NodeJS",
+	"main": "app.js",
+	"repository": "https://github.com/awslabs/aws-sam-cli/tree/develop/samcli/local/init/templates/cookiecutter-aws-sam-hello-nodejs",
+	"author": "SAM CLI",
+	"license": "MIT",
+	"scripts": {
+		"unit": "jest",
+		"lint": "eslint '*.ts' --quiet --fix",
+		"compile": "tsc",
+		"test": "npm run compile && npm run unit",
+		"dev": "tsx dev.ts",
+		"deploy": "cd .. && sam build && sam deploy --no-confirm-changeset && cd sender-1"
+	},
+	"dependencies": {
+		"@aws-sdk/client-dynamodb": "^3.864.0",
+		"@aws-sdk/credential-providers": "^3.864.0",
+		"@aws-sdk/client-ses": "^3.873.0",
+		"esbuild": "^0.25.9"
+	},
+	"devDependencies": {
+		"@types/aws-lambda": "^8.10.92",
+		"@types/node": "^20.5.7",
+		"@typescript-eslint/eslint-plugin": "^5.10.2",
+		"@typescript-eslint/parser": "^5.10.2",
+		"dotenv": "^17.2.1",
+		"prettier": "^2.5.1",
+		"ts-node": "^10.9.1",
+		"tsx": "^4.20.4",
+		"typescript": "^4.8.4"
+	}
+}

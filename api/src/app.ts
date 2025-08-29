@@ -43,7 +43,6 @@ const app: FastifyPluginAsync = async (fastify): Promise<void> => {
 				maxPrice,
 				neighborhood: requestedNeighborhood,
 			} = request.query;
-
 			let bedroomsAsNum = bedrooms ? parseInt(bedrooms) : undefined;
 			let minPriceAsNum = minPrice ? parseFloat(minPrice) : undefined;
 			let maxPriceAsNum = maxPrice ? parseFloat(maxPrice) : undefined;
@@ -72,7 +71,7 @@ const app: FastifyPluginAsync = async (fastify): Promise<void> => {
 			)
 				bedroomsAsNum = undefined;
 			if (
-				requestedNeighborhood &&
+				!requestedNeighborhood ||
 				!MTL_NEIGHBORHOODS.has(requestedNeighborhood)
 			)
 				requestedNeighborhood = undefined;
@@ -156,7 +155,7 @@ const app: FastifyPluginAsync = async (fastify): Promise<void> => {
 			}
 			if (bedrooms !== undefined && (bedrooms < 0 || bedrooms > 6))
 				bedrooms = undefined;
-			if (neighborhood && !MTL_NEIGHBORHOODS.has(neighborhood))
+			if (!neighborhood || !MTL_NEIGHBORHOODS.has(neighborhood))
 				neighborhood = undefined;
 
 			// Form search params string
@@ -178,7 +177,7 @@ const app: FastifyPluginAsync = async (fastify): Promise<void> => {
 				<p>Bedrooms: ${bedrooms === undefined ? "-" : `${bedrooms}+`}</p>
 				<p>Minimum price: ${minPrice === undefined ? "-" : `${minPrice}`}</p>
 				<p>Maximum price: ${maxPrice === undefined ? "-" : `${maxPrice}`}</p>
-				<p>Neighborhood: ${neighborhood === undefined ? "-" : neighborhood}</p>
+				<p>Neighborhood: ${!neighborhood ? "-" : neighborhood}</p>
 				<p>Please be aware that any existing subscriptions will be replaced by this one.</p>
 
 			`;

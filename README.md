@@ -138,3 +138,19 @@ for (const coordPoint of [geocodePoint, googleMapsPoint]) {
 }
 
 ```
+
+# Create / Delete AWS SES Email Templates
+
+## Create
+
+aws sesv2 create-email-template \
+ --cli-input-json file://./send-listings-template.json \
+ --region us-east-1
+
+## Delete
+
+```
+aws sesv2 delete-email-template \
+    --template-name SendListingsTemplate \
+    --region us-east-1
+```

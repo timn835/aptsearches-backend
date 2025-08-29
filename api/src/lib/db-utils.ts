@@ -1,13 +1,12 @@
 import {
 	DynamoDBClient,
-	QueryCommand,
 	GetItemCommand,
 	PutItemCommand,
+	QueryCommand,
 	type QueryCommandInput,
 } from "@aws-sdk/client-dynamodb";
 import { fromEnv } from "@aws-sdk/credential-providers";
-import { v4 as uuidv4 } from "uuid";
-import { type Listing, type AptSource } from "./types";
+import { type AptSource, type Listing } from "./types";
 
 const LISTINGS_TABLE = "aptsearches_listings";
 const SUBSCRIPTIONS_TABLE = "aptsearches_subscriptions";
@@ -99,9 +98,13 @@ export async function storeSubscription(
 		searchParams.neighborhood = { S: `${neighborhood}` };
 	}
 
+	// Get the date for timestamp
+	const now = new Date();
+
 	const item = {
 		email: { S: email },
 		subscriptionIndex: { N: `${subscriptionIndex}` },
+		dateStarted: { N: `${now.getTime()}` },
 		searchParams: { M: searchParams },
 	};
 
