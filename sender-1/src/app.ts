@@ -2,6 +2,7 @@ import {
 	fetchBookmark,
 	fetchListings,
 	fetchSubscriptions,
+	updateBookmark,
 } from "./lib/db-utils";
 import { sendBulkEmails } from "./lib/email-utils";
 import { type Listing } from "./lib/types";
@@ -23,10 +24,17 @@ export const send1Handler = async () => {
 		const listings = await fetchListings(bookmark);
 
 		// Add listings to each email
-		const emailListings: Record<string, Listing[]> = {};
+		const emailListings: Record<
+			string,
+			{ listings: Listing[]; unsubscribeSecret: string }
+		> = {};
 
-		for (const { email, searchParams } of subscriptions) {
-			emailListings[email] = [];
+		for (const {
+			email,
+			unsubscribeSecret,
+			searchParams,
+		} of subscriptions) {
+			emailListings[email] = { listings: [], unsubscribeSecret };
 			for (const listing of listings) {
 				if (
 					searchParams.bedrooms &&
@@ -48,12 +56,18 @@ export const send1Handler = async () => {
 					searchParams.neighborhood !== listing.neighborhood
 				)
 					continue;
-				emailListings[email].push(listing);
+				emailListings[email].listings.push(listing);
 			}
 		}
 
 		// Send out emails
 		await sendBulkEmails(emailListings);
+
+		// TODO: Update the bookmark
+		await updateBookmark(
+			"sendingEmails",
+			listings.length ? listings[0]?.dateFound : new Date().getTime()
+		);
 
 		return {
 			emailListings,
@@ -65,6 +79,4 @@ export const send1Handler = async () => {
 			message: "Unable to complete send1Handler",
 		};
 	}
-
-	//
 };

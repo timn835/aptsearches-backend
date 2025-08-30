@@ -6,7 +6,11 @@ import {
 	createSubscription,
 	getListings,
 } from "./lib/constants";
-import { fetchListings, storeSubscription } from "./lib/db-utils";
+import {
+	fetchListings,
+	removeSubscription,
+	storeSubscription,
+} from "./lib/db-utils";
 import { AptSource } from "./lib/types";
 import { decrypt, EMAIL_REGEX, MTL_NEIGHBORHOODS } from "./lib/utils";
 import { sendVerificationEmail } from "./lib/email-utils";
@@ -245,14 +249,46 @@ const app: FastifyPluginAsync = async (fastify): Promise<void> => {
 				neighborhood
 			);
 
-			reply
-				.status(201)
-				.send({ message: "Subscription created successfully!" });
+			reply.redirect(
+				`${process.env.FRONTEND_URL}?subscription_success=true`
+			);
 		} catch (error) {
 			console.error(error);
-			reply
-				.status(500)
-				.send({ message: "Unable to create subscription" });
+			reply.redirect(
+				`${process.env.FRONTEND_URL}?subscription_success=false`
+			);
+		}
+	});
+
+	fastify.get<{
+		Querystring: {
+			secret: string;
+		};
+	}>("/unsubscribe", async (request, reply) => {
+		try {
+			// Destructure query params
+			let decryptedSecret = decrypt(request.query.secret);
+			if (!decryptedSecret) throw Error("Decryption failed");
+			let [email, subscriptionIndex] = decryptedSecret.split(":");
+
+			if (
+				!email ||
+				!EMAIL_REGEX.test(email) ||
+				isNaN(parseInt(subscriptionIndex))
+			)
+				throw Error("Invalid unsubscribe secret");
+
+			// Delete subscription
+			await removeSubscription(email, subscriptionIndex);
+
+			reply.redirect(
+				`${process.env.FRONTEND_URL}?unsubscribe_success=true`
+			);
+		} catch (error) {
+			console.error(error);
+			reply.redirect(
+				`${process.env.FRONTEND_URL}?unsubscribe_success=false`
+			);
 		}
 	});
 };

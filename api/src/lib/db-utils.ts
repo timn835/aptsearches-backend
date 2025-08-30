@@ -3,10 +3,12 @@ import {
 	GetItemCommand,
 	PutItemCommand,
 	QueryCommand,
+	DeleteItemCommand,
 	type QueryCommandInput,
 } from "@aws-sdk/client-dynamodb";
 import { fromEnv } from "@aws-sdk/credential-providers";
 import { type AptSource, type Listing } from "./types";
+import { encrypt } from "./utils";
 
 const LISTINGS_TABLE = "aptsearches_listings";
 const SUBSCRIPTIONS_TABLE = "aptsearches_subscriptions";
@@ -101,8 +103,12 @@ export async function storeSubscription(
 	// Get the date for timestamp
 	const now = new Date();
 
+	// Get the unsubscribe secret as encrypted email
+	const unsubscribeSecret = encrypt(`${email}:${subscriptionIndex}`);
+
 	const item = {
 		email: { S: email },
+		unsubscribeSecret: { S: unsubscribeSecret },
 		subscriptionIndex: { N: `${subscriptionIndex}` },
 		dateStarted: { N: `${now.getTime()}` },
 		searchParams: { M: searchParams },
@@ -113,5 +119,19 @@ export async function storeSubscription(
 		Item: item,
 	});
 
+	await dbClient.send(command);
+}
+
+export async function removeSubscription(
+	email: string,
+	subscriptionIndex: string
+) {
+	const command = new DeleteItemCommand({
+		TableName: SUBSCRIPTIONS_TABLE,
+		Key: {
+			email: { S: email },
+			subscriptionIndex: { N: subscriptionIndex },
+		},
+	});
 	await dbClient.send(command);
 }

@@ -52,6 +52,7 @@ EntryPoints = ["src/app.ts"]
 
 
 
+
 [function_build_definitions.1a7a903d-8934-42bf-83f9-eaad4a89c7a2]
 codeuri = "/Users/timn835/Documents/Projects/aptsearches-backend/api"
 runtime = "nodejs20.x"
@@ -69,6 +70,7 @@ External = ["dotenv"]
 Minify = true
 Target = "es2022"
 Sourcemap = true
+
 
 
 
@@ -110,6 +112,7 @@ Minify = true
 Target = "es2022"
 Sourcemap = true
 EntryPoints = ["src/app.ts"]
+
 
 
 [layer_build_definitions]

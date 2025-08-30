@@ -24,6 +24,7 @@ export type Subscription = {
 	email: string;
 	subscriptionIndex: number;
 	dateStarted: number;
+	unsubscribeSecret: string;
 	searchParams: {
 		bedrooms?: number;
 		minPrice?: number;

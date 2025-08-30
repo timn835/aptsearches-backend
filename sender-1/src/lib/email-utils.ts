@@ -8,9 +8,15 @@ const emailClient = new SESClient({
 	credentials: fromEnv(),
 });
 
-export async function sendBulkEmails(emailListings: Record<string, Listing[]>) {
-	const destinations = Object.entries(emailListings).map(
-		([email, listings]) => ({
+export async function sendBulkEmails(
+	emailListings: Record<
+		string,
+		{ listings: Listing[]; unsubscribeSecret: string }
+	>
+) {
+	const destinations = Object.entries(emailListings)
+		.filter(([_, { listings }]) => listings.length)
+		.map(([email, { listings, unsubscribeSecret }]) => ({
 			Destination: { ToAddresses: [email] },
 			ReplacementTemplateData: JSON.stringify({
 				listings: listings
@@ -67,9 +73,11 @@ export async function sendBulkEmails(emailListings: Record<string, Listing[]>) {
       `
 					)
 					.join(""),
+				unsubscribeLink: `${process.env.BACKEND_URL}/unsubscribe?secret=${unsubscribeSecret}`,
 			}),
-		})
-	);
+		}));
+
+	if (!destinations.length) return;
 
 	await emailClient.send(
 		new SendBulkTemplatedEmailCommand({

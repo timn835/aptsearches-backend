@@ -3,12 +3,10 @@ import {
 	DynamoDBClient,
 	QueryCommand,
 	type QueryCommandInput,
-	type QueryCommandOutput,
 	ScanCommand,
 	GetItemCommand,
 	ScanCommandOutput,
-	ScanCommandInput,
-	// UpdateItemCommand,
+	UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { fromEnv } from "@aws-sdk/credential-providers";
 import { AptSource, Listing, type Subscription } from "./types";
@@ -31,6 +29,7 @@ export async function fetchSubscriptions(): Promise<Subscription[]> {
 	if (!response.Items) return [];
 	return response.Items.map((item) => ({
 		email: item.email.S!,
+		unsubscribeSecret: item.unsubscribeSecret.S!,
 		subscriptionIndex: parseInt(item.subscriptionIndex.N!),
 		dateStarted: parseInt(item.dateStarted.N!),
 		searchParams: Object.fromEntries(
@@ -56,9 +55,9 @@ export async function fetchBookmark(bookmarkType: string): Promise<string> {
 		},
 	});
 	const response = await dbClient.send(command);
-	if (!response.Item || !response.Item.bookmark?.S)
+	if (!response.Item || !response.Item.bookmark?.N)
 		throw Error(`Unable to fetch bookmark of type "${bookmarkType}"`);
-	return response.Item.bookmark.S;
+	return response.Item.bookmark.N;
 }
 
 export async function fetchListings(
@@ -121,4 +120,21 @@ export async function fetchListings(
 		lastEvaluatedKey = response.LastEvaluatedKey;
 	} while (lastEvaluatedKey);
 	return allItems;
+}
+
+export async function updateBookmark(bookmarkType: string, bookmark: number) {
+	const command = new UpdateItemCommand({
+		TableName: BOOKMARKS_TABLE,
+		Key: {
+			bookmarkType: { S: bookmarkType },
+		},
+		UpdateExpression: "SET #bookmark = :bookmark",
+		ExpressionAttributeNames: {
+			"#bookmark": "bookmark",
+		},
+		ExpressionAttributeValues: {
+			":bookmark": { N: `${bookmark}` },
+		},
+	});
+	await dbClient.send(command);
 }
