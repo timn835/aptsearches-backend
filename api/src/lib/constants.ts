@@ -80,3 +80,27 @@ export const createSubscription: RouteShorthandOptions = {
 		},
 	},
 };
+
+export const createSuggestion: RouteShorthandOptions = {
+	schema: {
+		body: {
+			type: "object",
+			properties: {
+				email: { type: "string" },
+				suggestion: { type: "string" },
+			},
+			required: ["email", "suggestion"],
+		},
+		response: {
+			201: {
+				type: "object",
+				properties: {
+					message: {
+						type: "string",
+					},
+				},
+				required: ["message"],
+			},
+		},
+	},
+};

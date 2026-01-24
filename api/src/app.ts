@@ -4,14 +4,17 @@ import fastify, { type FastifyPluginAsync } from "fastify";
 import {
 	allowedOrigins,
 	createSubscription,
+	createSuggestion,
 	getListings,
 } from "./lib/constants";
 import {
 	fetchListings,
+	fetchSubscription,
 	removeSubscription,
 	storeSubscription,
+	storeSuggestion,
 } from "./lib/db-utils";
-import { AptSource } from "./lib/types";
+import { AptSource, type Subscription } from "./lib/types";
 import { decrypt, EMAIL_REGEX, MTL_NEIGHBORHOODS } from "./lib/utils";
 import { sendVerificationEmail } from "./lib/email-utils";
 
@@ -289,6 +292,39 @@ const app: FastifyPluginAsync = async (fastify): Promise<void> => {
 			reply.redirect(
 				`${process.env.FRONTEND_URL}?unsubscribe_success=false`
 			);
+		}
+	});
+
+	fastify.post<{
+		Body: {
+			email: string;
+			suggestion: string;
+		};
+	}>("/suggestion", createSuggestion, async (request, reply) => {
+		try {
+			let { email, suggestion } = request.body;
+			// Check if the email satisfies the regex
+			if (email.length > 300 || !EMAIL_REGEX.test(email))
+				throw Error("The email is of incorrect format");
+
+			suggestion = suggestion.slice(0, 300);
+
+			// Check if the email has a subscription
+			const subscription: Subscription | undefined =
+				await fetchSubscription(email, 0);
+
+			if (!subscription)
+				throw Error("Unsubscribed user tries to make suggestion");
+
+			// Store suggestion
+			await storeSuggestion(email, suggestion);
+
+			reply
+				.status(201)
+				.send({ message: "Suggestion stored successfully" });
+		} catch (error) {
+			console.error(error);
+			reply.status(500).send({ message: "Unable to store suggestion" });
 		}
 	});
 };

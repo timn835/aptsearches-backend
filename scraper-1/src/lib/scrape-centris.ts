@@ -105,9 +105,7 @@ export async function scrapeCentris(bedrooms?: string): Promise<Listing[]> {
 
 		const $ = cheerio.load(text!);
 
-		const listings: (Listing & { lng?: number; lat?: number })[] = $(
-			".property-thumbnail-item"
-		)
+		const listings: Listing[] = $(".property-thumbnail-item")
 			.map((_, el) => {
 				const $el = $(el);
 
@@ -146,6 +144,13 @@ export async function scrapeCentris(bedrooms?: string): Promise<Listing[]> {
 				const matchScore = $el.find(".ll-match-score");
 				const id = matchScore.attr("data-id") || "";
 
+				// If no neighborhood, get latitude & longitude
+				let lat: string | undefined, lng: string | undefined;
+				if (!neighborhood) {
+					lat = matchScore.attr("data-lat");
+					lng = matchScore.attr("data-lng");
+				}
+
 				// price (from <meta itemprop="price">, fallback to text)
 				let price: string | number =
 					$el.find(".price meta[itemprop='price']").attr("content") ||
@@ -173,6 +178,8 @@ export async function scrapeCentris(bedrooms?: string): Promise<Listing[]> {
 					aptSource: AptSource.CENTRIS,
 					size,
 					neighborhood,
+					lat,
+					lng,
 				};
 			})
 			.get();

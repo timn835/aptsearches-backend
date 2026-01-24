@@ -1,5 +1,4 @@
 import {
-	// BatchWriteItemCommand,
 	DynamoDBClient,
 	QueryCommand,
 	type QueryCommandInput,
@@ -119,7 +118,9 @@ export async function fetchListings(
 		);
 		lastEvaluatedKey = response.LastEvaluatedKey;
 	} while (lastEvaluatedKey);
-	return allItems;
+	return allItems.sort(
+		(listingA, listingB) => listingB.dateFound - listingA.dateFound
+	);
 }
 
 export async function updateBookmark(bookmarkType: string, bookmark: number) {

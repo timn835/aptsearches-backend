@@ -82,7 +82,7 @@ export const scrape1Handler = async () => {
 			}`,
 		};
 	} catch (err) {
-		console.log(err);
+		console.error(err);
 		return {
 			statusCode: 500,
 			message: "Unable to complete scrape1Handler",

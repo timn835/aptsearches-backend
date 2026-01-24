@@ -57,13 +57,14 @@ export const send1Handler = async () => {
 				)
 					continue;
 				emailListings[email].listings.push(listing);
+				if (emailListings[email].listings.length > 20) break;
 			}
 		}
 
 		// Send out emails
 		await sendBulkEmails(emailListings);
 
-		// TODO: Update the bookmark
+		// Update the bookmark
 		await updateBookmark(
 			"sendingEmails",
 			listings.length ? listings[0]?.dateFound : new Date().getTime()

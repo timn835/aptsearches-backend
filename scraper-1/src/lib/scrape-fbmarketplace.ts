@@ -44,7 +44,13 @@ export async function scrapeFBMarketplace(
 				listings.push(listing);
 			}
 		}
-		return listings;
+
+		let timeStamp = new Date().getTime() + listings.length;
+
+		return listings.map((listing) => {
+			timeStamp -= 1;
+			return { ...listing, dateFound: timeStamp };
+		});
 	}
 	const res = await fetch(
 		searchType === "property"
@@ -86,6 +92,13 @@ export async function scrapeFBMarketplace(
 							node.listing.listing_price.amount
 						);
 						if (isNaN(price)) price = 0;
+						const hasAddress = !isNaN(
+							parseInt(
+								node.listing.custom_sub_titles_with_rendering_flags
+									?.at(0)
+									?.subtitle?.at(0)
+							)
+						);
 						return {
 							id: node.listing.id,
 							dateFound: 0,
@@ -94,13 +107,17 @@ export async function scrapeFBMarketplace(
 							imageUrl:
 								node.listing.primary_listing_photo.image.uri,
 							url: `https://www.facebook.com/marketplace/item/${node.listing.id}`,
-							address:
-								node.listing.custom_sub_titles_with_rendering_flags?.at(
-									0
-								)?.subtitle ||
-								node.listing.location?.reverse_geocode
-									?.city_page?.display_name ||
-								"",
+							address: hasAddress
+								? `${
+										node.listing.custom_sub_titles_with_rendering_flags?.at(
+											0
+										)?.subtitle
+								  }, ${
+										node.listing.location?.reverse_geocode
+											?.city_page?.display_name
+								  }`
+								: node.listing.location?.reverse_geocode
+										?.city_page?.display_name,
 							price,
 							priceCurrency: "CAD",
 							aptSource: AptSource.FBMARKETPLACE,

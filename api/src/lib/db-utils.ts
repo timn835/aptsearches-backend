@@ -7,11 +7,12 @@ import {
 	type QueryCommandInput,
 } from "@aws-sdk/client-dynamodb";
 import { fromEnv } from "@aws-sdk/credential-providers";
-import { type AptSource, type Listing } from "./types";
+import { type Subscription, type AptSource, type Listing } from "./types";
 import { encrypt } from "./utils";
 
 const LISTINGS_TABLE = "aptsearches_listings";
 const SUBSCRIPTIONS_TABLE = "aptsearches_subscriptions";
+const SUGGESTIONS_TABLE = "aptsearches_suggestions";
 
 const dbClient = new DynamoDBClient({
 	region: process.env.AWS_REGION,
@@ -56,25 +57,37 @@ export async function fetchListings(aptSource: AptSource): Promise<Listing[]> {
 export async function fetchSubscription(
 	email: string,
 	subscriptionIndex: number
-): Promise<{ subscriptionIndex: number; isVerified: boolean } | undefined> {
+): Promise<Subscription | undefined> {
 	const params = {
 		TableName: SUBSCRIPTIONS_TABLE,
 		Key: {
 			email: { S: email },
 			subscriptionIndex: { N: `${subscriptionIndex}` },
 		},
-		ProjectionExpression: "email, subscriptionIndex, isVerified",
 	};
 
 	const command = new GetItemCommand(params);
 	const response = await dbClient.send(command);
 
 	if (response.Item) {
-		const item = {
-			subscriptionIndex: Number(response.Item.subscriptionIndex.N),
-			isVerified: response.Item.isVerified.BOOL!,
+		return {
+			email: response.Item.email.S!,
+			unsubscribeSecret: response.Item.unsubscribeSecret.S!,
+			subscriptionIndex: parseInt(response.Item.subscriptionIndex.N!),
+			dateStarted: parseInt(response.Item.dateStarted.N!),
+			searchParams: Object.fromEntries(
+				Object.entries(response.Item.searchParams.M!).map(
+					([paramKey, paramValue]) => [
+						paramKey,
+						paramKey === "bedrooms"
+							? parseInt(paramValue.N!)
+							: paramKey === "minPrice" || paramKey === "maxPrice"
+							? parseFloat(paramValue.N!)
+							: paramValue.S,
+					]
+				)
+			),
 		};
-		return item;
 	}
 }
 
@@ -133,5 +146,19 @@ export async function removeSubscription(
 			subscriptionIndex: { N: subscriptionIndex },
 		},
 	});
+	await dbClient.send(command);
+}
+
+export async function storeSuggestion(email: string, suggestion: string) {
+	const item = {
+		email: { S: email },
+		suggestion: { S: suggestion },
+	};
+
+	const command = new PutItemCommand({
+		TableName: SUGGESTIONS_TABLE,
+		Item: item,
+	});
+
 	await dbClient.send(command);
 }
