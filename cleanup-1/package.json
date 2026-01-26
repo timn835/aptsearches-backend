@@ -1,0 +1,35 @@
+{
+	"name": "clean-up",
+	"version": "1.0.0",
+	"type": "module",
+	"description": "clean-up function to remove old listings",
+	"main": "app.js",
+	"repository": "",
+	"author": "timn835",
+	"license": "MIT",
+	"scripts": {
+		"lint": "eslint '*.ts' --quiet --fix",
+		"compile": "tsc",
+		"dev": "tsx dev.ts",
+		"deploy": "cd .. && sam build && sam deploy --no-confirm-changeset && cd scraper-1"
+	},
+	"dependencies": {
+		"@aws-sdk/client-dynamodb": "^3.864.0",
+		"@aws-sdk/credential-providers": "^3.864.0",
+		"esbuild": "^0.25.9"
+	},
+	"devDependencies": {
+		"@types/aws-lambda": "^8.10.92",
+		"@types/node": "^20.5.7",
+		"@typescript-eslint/eslint-plugin": "^5.10.2",
+		"@typescript-eslint/parser": "^5.10.2",
+		"dotenv": "^17.2.1",
+		"eslint": "^8.8.0",
+		"eslint-config-prettier": "^8.3.0",
+		"eslint-plugin-prettier": "^4.0.0",
+		"prettier": "^2.5.1",
+		"ts-node": "^10.9.1",
+		"tsx": "^4.20.4",
+		"typescript": "^4.8.4"
+	}
+}

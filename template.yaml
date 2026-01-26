@@ -67,6 +67,25 @@ Resources:
                 EntryPoints:
                     - src/app.ts
 
+    APTSearchesCleanup1:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: cleanup-1/
+            Handler: src/app.cleanup1Handler
+            Runtime: nodejs20.x
+            Architectures:
+                - x86_64
+        Metadata: # Manage esbuild properties
+            BuildMethod: esbuild
+            BuildProperties:
+                External:
+                    - dotenv
+                Minify: true
+                Target: "es2022"
+                Sourcemap: true
+                EntryPoints:
+                    - src/app.ts
+
     APTSearchesAPI:
         Type: AWS::Serverless::Function
         Properties:
