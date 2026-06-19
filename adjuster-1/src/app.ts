@@ -33,20 +33,20 @@ export const adjust1Handler = async () => {
 			(listing) =>
 				!listing.neighborhood &&
 				(listing.aptSource !== AptSource.FBMARKETPLACE || // FBMarketplace does not include postal code, unlike KIJIJI, discard
-					!isNaN(parseInt(listing.address.charAt(0))))
+					!isNaN(parseInt(listing.address?.charAt(0)))),
 		);
 
 		// First do the ones that we can do using geocode
 		let keyToUse = process.env.GEOCODE_MAPS_API_KEY1;
 		for (const listing of listings) {
 			if (listing.lat && listing.lng) continue;
-			if (isNaN(parseInt(listing.address.charAt(0)))) continue;
+			if (isNaN(parseInt(listing.address?.charAt(0)))) continue;
 			try {
 				// Geocode address
 				const res = await fetch(
 					`https://geocode.maps.co/search?q=${encodeURIComponent(
-						listing.address.split(",").slice(0, -1).join(",")
-					)}&countrycodes=ca&api_key=${keyToUse}`
+						listing.address.split(",").slice(0, -1).join(","),
+					)}&countrycodes=ca&api_key=${keyToUse}`,
 				);
 				const geocodeInfo = await res.json();
 				listing.lat = geocodeInfo[0]?.lat;
@@ -55,7 +55,7 @@ export const adjust1Handler = async () => {
 					"geocode point",
 					listing.address,
 					listing.lat,
-					listing.lng
+					listing.lng,
 				);
 			} catch (error) {
 				console.error("Unable to geocode");
@@ -76,8 +76,8 @@ export const adjust1Handler = async () => {
 				googleApiCount++;
 				const res = await fetch(
 					`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-						listing.address
-					)}&region=ca&key=${process.env.GOOGLE_MAPS_API_KEY}`
+						listing.address,
+					)}&region=ca&key=${process.env.GOOGLE_MAPS_API_KEY}`,
 				);
 				const data = await res.json();
 				listing.lat = data?.results[0]?.geometry?.location?.lat;
@@ -86,7 +86,7 @@ export const adjust1Handler = async () => {
 					"google maps point",
 					listing.address,
 					listing.lat,
-					listing.lng
+					listing.lng,
 				);
 			} catch (error) {
 				console.error("Unable to geocode with google");
@@ -112,7 +112,7 @@ export const adjust1Handler = async () => {
 					referrer: "https://epsg.io/",
 					method: "GET",
 					mode: "cors",
-				}
+				},
 			);
 			const data = await res.json();
 
@@ -132,7 +132,7 @@ export const adjust1Handler = async () => {
 				neighborhoodName,
 				neighborhoodName
 					? MTL_NEIGHBORHOODS.has(neighborhoodName)
-					: "no neighborhood"
+					: "no neighborhood",
 			);
 			if (neighborhoodName) listing.neighborhood = neighborhoodName;
 			await sleep(200);
@@ -154,7 +154,7 @@ export const adjust1Handler = async () => {
 			"adjustingListings",
 			initialListings.length
 				? initialListings[0]?.dateFound
-				: new Date().getTime()
+				: new Date().getTime(),
 		);
 
 		return {
